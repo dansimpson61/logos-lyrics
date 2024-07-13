@@ -1,0 +1,99 @@
+'use strict';
+
+class LyricsSearchApp {
+  constructor() {
+    this.searchInput = $('#search-input');
+    this.results = $('#results');
+    this.apiUrl = 'https://api.lyrics.ovh';
+    this.lyricsDiv = $('#lyrics');
+    this.timeoutSuggest = null;
+    this.init();
+  }
+
+  init() {
+    this.lyricsDiv.hide();
+    this.bindEvents();
+  }
+
+  bindEvents() {
+    this.searchInput.on('input', () => {
+      if (this.timeoutSuggest) {
+        clearTimeout(this.timeoutSuggest);
+      }
+      this.timeoutSuggest = setTimeout(() => this.suggestions(), 300);
+    });
+
+    $(window).resize(() => {
+      this.adjustLyricsPresentation();
+    });
+  }
+
+  removeResults() {
+    $('.result').remove();
+  }
+
+  suggestions() {
+    const term = this.searchInput.val();
+    if (!term) {
+      this.removeResults();
+      return;
+    }
+    $.getJSON(`${this.apiUrl}/suggest/${term}`, (data) => {
+      this.removeResults();
+      data.data.slice(0, 20).forEach((result) => {
+        const displayText = `${result.title} - ${result.artist.name}`;
+        const element = $(`<li class="result">${displayText}</li>`).click(() => {
+          this.fetchLyrics(result.artist.name, result.title, displayText);
+        });
+        this.results.append(element);
+      });
+    });
+  }
+
+  fetchLyrics(artist, title, displayText) {
+    this.removeResults();
+    this.lyricsDiv.slideUp();
+    $.getJSON(`${this.apiUrl}/v1/${artist}/${title}`, (data) => {
+      const html = `<h3 class="lyrics-title">${displayText}</h3><div id="thelyrics">${data.lyrics.replace(/\n/g, '<br />')}</div>`;
+      this.lyricsDiv.html(html).slideDown();
+      this.adjustLyricsPresentation();
+    });
+  }
+
+  adjustLyricsPresentation() {
+    const lyricsContent = document.getElementById('thelyrics');
+    if (!lyricsContent) return;
+
+    let fontSize = 16; // Starting font size
+    let columnCount = 2; // Starting column count
+    const maxHeight = window.innerHeight - 100; // Adjust based on actual available space
+    const textLength = lyricsContent.textContent.length;
+
+    // Dynamically adjust font size and column count based on text length
+    if (textLength > 1000) {
+      fontSize = 14;
+      columnCount = 3;
+    } else if (textLength < 500) {
+      fontSize = 18;
+      columnCount = 1;
+    }
+
+    // Apply dynamic adjustments
+    lyricsContent.style.fontSize = `${fontSize}px`;
+    lyricsContent.style.columnCount = columnCount;
+
+    // Further adjustments to ensure content fits without scrolling
+    while (lyricsContent.scrollHeight > maxHeight && fontSize > 10) {
+      fontSize--;
+      lyricsContent.style.fontSize = `${fontSize}px`;
+      if (columnCount < 4 && lyricsContent.scrollHeight > maxHeight) {
+        columnCount++;
+        lyricsContent.style.columnCount = columnCount;
+      }
+    }
+  }
+}
+
+$(document).ready(() => {
+  new LyricsSearchApp();
+});
