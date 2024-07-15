@@ -9,3 +9,4 @@ gem 'json'
 gem 'uri'
 gem 'http'
 gem 'puma'
+gem "rackup", "~> 2.1"

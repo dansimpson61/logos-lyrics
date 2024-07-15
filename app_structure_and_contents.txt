@@ -1,0 +1,380 @@
+App Structure and Contents
+===========================
+
+Directory Structure:
+.
+├── app.rb
+├── app_structure_and_contents.txt
+├── Gemfile
+├── Gemfile.lock
+├── generate-app-structure.sh
+├── lyrics_service.rb
+├── public
+│   ├── Index.html
+│   ├── logos.css
+│   ├── logos.js
+│   ├── logos.js_bak
+│   └── search.js_bak
+└── views
+    └── api keys
+
+3 directories, 12 files
+
+File: ./public/Index.html
+----------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> </title>
+    <link href="https://fonts.googleapis.com/css?family=Bungee+Shade|Crimson+Text|Open+Sans:400,800" rel="stylesheet">
+    <link rel="stylesheet" href="logos.css">
+</head>
+<body>
+    <header>
+        <h1> logos </h1>
+    </header>
+    <main class="container">
+        <section class="search">
+            <form id="search-form">
+                <input type="text" name="song" class="search-song" placeholder="song or artist" id="search-input" autofocus>
+                <button type="submit" class="search-button">Search</button>
+            </form>
+            <ul class="result" id="result"></ul>
+            <ul class="results" id="results"></ul>
+        </section>
+        <section class="lyrics" id="lyrics" style="display:none;"></section>
+    </main>
+    <footer>
+        <p>&copy; 2024 logos</p>
+    </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="logos.js"></script>
+    <!-- <script src="http://tracking.musixmatch.com/t1.0/AMa6hJCIEzn1v8RuOP"></script> -->
+</body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>logos</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=yes"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Bungee+Shade|Crimson+Text|Open+Sans:400,800"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="logos.css" />
+
+  </head>
+  <body>
+    <div class="container">
+      <div class="search">
+        <input
+          type="text"
+          name="song"
+          class="search-song"
+          autofocus="autofocus"
+          placeholder="Type the song you want the lyrics"
+          id="search-input"
+        />
+        <ul class="results" id="results"></ul>
+      </div>
+
+      <div class="lyrics" id="lyrics"></div>
+    </div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"
+      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"
+    ></script>
+    <script src="search.js" charset="utf-8"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.16/clipboard.min.js"></script> -->
+  </body>
+</html> -->
+----------------------
+
+File: ./public/logos.js
+----------------------
+'use strict';
+
+$(document).ready(function() {
+  class LyricsApp {
+    constructor() {
+      this.searchInput = $('#search-input');
+      this.results = $('#results');
+      this.lyricsDiv = $('#lyrics');
+      this.init();
+    }
+
+    init() {
+      this.lyricsDiv.hide();
+      this.bindEvents();
+    }
+
+    bindEvents() {
+      // Attach event listener to search form to prevent default form submission
+      $('#search-form').on('submit', (e) => {
+        e.preventDefault();
+        this.performSearch();
+      });
+
+      // Optional: Listen for input events as well for instant search (debounced)
+      // this.searchInput.on('input', debounce(this.performSearch.bind(this), 500));
+    }
+
+    performSearch() {
+      const term = this.searchInput.val().trim();
+      if (!term) {
+        this.clearResults();
+        return;
+      }
+      $.getJSON(`/search?term=${encodeURIComponent(term)}`)
+        .then(response => {
+          if (response.success) {
+            this.displayResults(response.results);
+          } else {
+            console.error('Error fetching data', response.error);
+          }
+        })
+        .catch(error => console.error('Error fetching data', error));
+    }
+
+    clearResults() {
+      this.results.empty();
+    }
+
+    displayResults(tracks) {
+      this.clearResults();
+      tracks.forEach(track => {
+        const item = track.track;
+        const resultElement = $(`<li class="result">${item.artist_name} - ${item.track_name}</li>`);
+        resultElement.on('click', () => this.displayLyrics(item.track_id, item.artist_name, item.track_name));
+        this.results.append(resultElement);
+      });
+    }
+
+    displayLyrics(trackId, artistName, trackName) {
+      $.getJSON(`/lyrics?track_id=${trackId}`)
+        .then(response => {
+          if (response.success) {
+            this.lyricsDiv.html(`<h3>${artistName} - ${trackName}</h3><p>${response.lyrics.replace(/\n/g, '<br/>')}</p>`).show();
+          } else {
+            console.error('Error fetching lyrics', response.error);
+          }
+        })
+        .catch(error => console.error('Error fetching lyrics', error));
+    }
+  }
+
+  // Initialize the lyrics application
+  const app = new LyricsApp();
+});
+
+
+// class LyricsService {
+//   constructor(apiKey) {
+//     this.apiKey = apiKey;
+//     this.baseUrl = ''; // This will be set by subclasses
+//   }
+
+//   search(term) {
+//     throw new Error('Search method must be implemented by subclasses');
+//   }
+
+//   fetchLyrics(trackId) {
+//     throw new Error('FetchLyrics method must be implemented by subclasses');
+//   }
+// }
+
+// class MusixmatchService extends LyricsService {
+//   constructor(apiKey) {
+//     super(apiKey);
+//     this.baseUrl = 'https://api.musixmatch.com/ws/1.1/';
+//   }
+
+//   search(term) {
+//     const url = `${this.baseUrl}track.search?q=${encodeURIComponent(term)}&page_size=10&page=1&s_track_rating=desc&apikey=${this.apiKey}`;
+//     return $.getJSON(url).then(response => response.message.body.track_list.filter(track => track.track.has_lyrics));
+//   }
+
+//   fetchLyrics(trackId) {
+//     const url = `${this.baseUrl}track.lyrics.get?track_id=${trackId}&apikey=${this.apiKey}`;
+//     return $.getJSON(url).then(response => response.message.body.lyrics.lyrics_body);
+//   }
+// }
+
+// class LyricsApp {
+//   constructor(lyricsService) {
+//     this.lyricsService = lyricsService;
+//     this.searchInput = $('#search-input');
+//     this.results = $('#results');
+//     this.lyricsDiv = $('#lyrics');
+//     this.init();
+//   }
+
+//   init() {
+//     this.lyricsDiv.hide();
+//     this.bindEvents();
+//   }
+
+//   bindEvents() {
+//     this.searchInput.on('input', () => {
+//       const term = this.searchInput.val().trim();
+//       if (!term) {
+//         this.clearResults();
+//         return;
+//       }
+//       this.lyricsService.search(term)
+//         .then(tracks => this.displayResults(tracks))
+//         .catch(error => console.error('Error fetching data', error));
+//     });
+//   }
+
+//   clearResults() {
+//     this.results.empty();
+//   }
+
+//   displayResults(tracks) {
+//     this.clearResults();
+//     tracks.forEach(track => {
+//       const item = track.track;
+//       const resultElement = $(`<li class="result">${item.artist_name} - ${item.track_name}</li>`);
+//       resultElement.on('click', () => this.displayLyrics(item.track_id, item.artist_name, item.track_name));
+//       this.results.append(resultElement);
+//     });
+//   }
+
+//   displayLyrics(trackId, artistName, trackName) {
+//     this.lyricsService.fetchLyrics(trackId)
+//       .then(lyrics => {
+//         this.lyricsDiv.html(`<h3>${artistName} - ${trackName}</h3><p>${lyrics.replace(/\n/g, '<br/>')}</p>`).show();
+//       })
+//       .catch(error => console.error('Error fetching lyrics', error));
+//   }
+// }
+
+// // Example usage:
+// const apiKey = 'f5c171c61c448f24f1f333cd7ee51019';
+// const musixmatchService = new MusixmatchService(apiKey);
+// const app = new LyricsApp(musixmatchService);
+
+----------------------
+
+File: ./lyrics_service.rb
+----------------------
+# lyrics_service.rb
+
+require 'http' 
+require 'json'
+require 'uri'
+
+# Base lyrics service class
+class LyricsService
+  def search(term)
+    raise NotImplementedError, 'This method should be implemented by subclasses'
+  end
+
+  def fetch_lyrics(track_id)
+    raise NotImplementedError, 'This method should be implemented by subclasses'
+  end
+end
+
+# Musixmatch service subclass
+class MusixmatchService < LyricsService
+#  API_KEY = ENV['MUSIXMATCH_API_KEY']
+  API_KEY = 'f5c171c61c448f24f1f333cd7ee51019'
+  BASE_URL = 'https://api.musixmatch.com/ws/1.1/'
+
+  def search(term)
+    url = "#{BASE_URL}track.search?q_track_artist=#{URI.encode_www_form_component(term)}&page_size=10&page=1&s_track_rating=desc&apikey=#{API_KEY}"
+    response = HTTP.get(url)
+    JSON.parse(response.body.to_s)['message']['body']['track_list'].select { |track| track['track']['has_lyrics'] }
+  end
+
+  def fetch_lyrics(track_id)
+    url = "#{BASE_URL}track.lyrics.get?track_id=#{track_id}&apikey=#{API_KEY}"
+    response = HTTP.get(url)
+    JSON.parse(response.body.to_s)['message']['body']['lyrics']['lyrics_body']
+  end
+end
+
+# Lyrics.ovh service subclass
+class LyricsOvhService < LyricsService
+  BASE_URL = 'https://api.lyrics.ovh/v1/'
+
+  def search(term)
+    url = "#{BASE_URL}suggest/#{URI.encode_www_form_component(term)}"
+    response = HTTP.get(url)
+    JSON.parse(response.body.to_s)['data'].select { |track| track['title'] && track['artist']['name'] }
+  end
+
+  def fetch_lyrics(track_id)
+    url = "#{BASE_URL}#{URI.encode_www_form_component(track_id)}"
+    response = HTTP.get(url)
+    JSON.parse(response.body.to_s)['lyrics']
+  end
+end
+----------------------
+
+File: ./app.rb
+----------------------
+#app.rb
+
+require 'sinatra'
+require 'puma'
+require 'json'
+require 'rack/cors'
+require_relative 'lyrics_service.rb' # Require the lyrics service file
+
+# Initialize your lyrics service
+lyrics_service = MusixmatchService.new
+#lyrics_service = LyricsOvhService.new
+
+use Rack::Cors do
+  allow do
+    origins '*'
+    resource '*', headers: :any, methods: [:get, :post, :put, :delete, :options]
+  end
+end
+
+# Serve static files from the public directory
+set :public_folder, 'public'
+
+# Route to serve the index.html file
+get '/' do
+  send_file File.join(settings.public_folder, 'index.html')
+end
+
+# Route to search songs or artists
+get '/search' do
+  content_type :json
+  term = params['term']
+  begin
+    results = lyrics_service.search(term)
+    { success: true, results: results }.to_json
+  rescue => e
+    { success: false, error: e.message }.to_json
+  end
+end
+
+# Route to fetch lyrics
+get '/lyrics' do
+  content_type :json
+  track_id = params['track_id']
+  begin
+    lyrics = lyrics_service.fetch_lyrics(track_id)
+    { success: true, lyrics: lyrics }.to_json
+  rescue => e
+    { success: false, error: e.message }.to_json
+  end
+end
+
+----------------------
+
