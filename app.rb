@@ -10,12 +10,12 @@ require_relative 'lyrics_service.rb' # Require the lyrics service file
 lyrics_service = MusixmatchService.new
 #lyrics_service = LyricsOvhService.new
 
-use Rack::Cors do
-  allow do
-    origins '*'
-    resource '*', headers: :any, methods: [:get, :post, :put, :delete, :options]
-  end
-end
+# use Rack::Cors do
+#   allow do
+#     origins '*'
+#     resource '*', headers: :any, methods: [:get, :post, :put, :delete, :options]
+#   end
+# end
 
 # Serve static files from the public directory
 set :public_folder, 'public'
