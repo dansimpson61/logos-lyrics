@@ -140,7 +140,7 @@ The backend provides the following API endpoints:
 ```
 
 *   `app.rb`: The core Sinatra application file. It defines routes, handles incoming requests, and interacts with the `lyrics_service` to fetch data.
-*   `lyrics_service.rb`: Contains classes (`MusixmatchService`, `LyricsOvhService`) responsible for communicating with external lyrics APIs.
+*   `lyrics_service.rb`: Contains classes (`MusixmatchService`, `LyricsOvhService`) responsible for communicating with external lyrics APIs. It utilizes an **Adapter pattern**, where the `LyricsService` base class defines a common interface, and concrete service classes adapt this interface to work with specific external APIs (like Musixmatch or Lyrics.ovh). This allows `app.rb` to use different lyric providers consistently.
 *   `public/`: This directory holds all static files served to the client:
     *   `index.html`: The single HTML page for the application.
     *   `logos.css`: Contains the CSS styles.
@@ -160,6 +160,8 @@ This is a list of potential improvements and features for the future:
     *   The `LyricsOvhService` class is present in `lyrics_service.rb` but commented out in `app.rb`.
     *   Uncomment and fully integrate it as an alternative lyrics provider.
     *   Potentially add a mechanism (e.g., UI toggle or configuration) to switch between lyrics services.
+*   **Add More Lyric Service Adapters:**
+    *   Consider implementing adapters for other lyrics APIs such as Genius, ChartLyrics, or any other available services to expand the sources of lyrics.
 *   **Error Handling and Frontend Feedback:**
     *   Improve how errors from API calls are displayed to the user on the frontend (e.g., user-friendly messages instead of just console logs).
     *   Provide clearer loading indicators during API requests.
