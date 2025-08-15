@@ -101,30 +101,20 @@ class AZLyricsService < LyricsService
     response = HTTP.get(url)
     return [] unless response.status.success?
 
-    doc = Nokogiri::HTML(response.body.to_s)
-    results = []
-
-    doc.css('td.visitedlyr').each do |cell|
-      link = cell.at_css('a')
-      next unless link && link['href'] && link['href'].start_with?('https://www.azlyrics.com/lyrics/')
-
-      # Artist is in the second 'b' tag
-      artist_tag = cell.css('b')[1]
-      artist = artist_tag ? artist_tag.text.strip : "Unknown Artist"
-      title = link.text.strip
-
-      results << {
-        id: link['href'],
-        title: title,
-        artist: artist,
-        service: 'azlyrics'
-      }
-    end
-
-    results.first(10)
+    # Return the raw HTML as a dummy result for debugging
+    [{
+      id: response.body.to_s,
+      title: "DEBUG: Raw HTML",
+      artist: "AZLyrics",
+      service: "azlyrics_debug"
+    }]
   rescue => e
-    puts "Error in AZLyricsService#search: #{e.message}"
-    []
+    [{
+      id: "Error: #{e.message}",
+      title: "DEBUG: Error",
+      artist: "AZLyrics",
+      service: "azlyrics_debug"
+    }]
   end
 
   def fetch_lyrics(song_url)

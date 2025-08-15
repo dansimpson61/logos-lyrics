@@ -10,3 +10,5 @@ gem 'uri'
 gem 'http'
 gem 'puma'
 gem "rackup", "~> 2.1"
+gem 'dotenv'
+gem 'nokogiri'
