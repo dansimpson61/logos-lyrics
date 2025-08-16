@@ -58,6 +58,15 @@ class SongLyricsService < LyricsService
 
   def search(term)
     search_url = "#{BASE_URL}/index.php?section=search&searchW=#{URI.encode_www_form_component(term)}"
+
+    
+    response = HTTP.get(search_url)
+    return [] unless response.status.success?
+
+    doc = Nokogiri::HTML(response.body.to_s)
+    doc.css('div.serpresult').map do |item|
+
+      
     puts "Searching for: #{search_url}"
     response = HTTP.get(search_url)
     puts "Response status: #{response.status}"
@@ -66,6 +75,7 @@ class SongLyricsService < LyricsService
 
     doc = Nokogiri::HTML(response.body.to_s)
     results = doc.css('div.serp-item').map do |item|
+
       title_element = item.css('h3 a').first
       artist_element = item.css('p a').first
       next unless title_element && artist_element
@@ -78,9 +88,11 @@ class SongLyricsService < LyricsService
         }
       }
     end.compact
+
     puts "Found #{results.size} results."
     puts "First result: #{results.first}"
     results
+
   end
 
   def fetch_lyrics(track_id)
