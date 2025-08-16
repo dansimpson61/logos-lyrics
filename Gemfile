@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-gem 'sinatra', '4.0.0'
+gem 'sinatra', '~> 4.1'
 gem 'rack', '~> 3.0'
 gem 'rack-cors'
 gem 'json'
