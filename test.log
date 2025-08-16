@@ -20,6 +20,6 @@ Found 2 results.
 First result: {"track"=>{"track_name"=>"Bohemian Rhapsody Lyrics", "artist_name"=>"Queen", "track_id"=>"https://www.songlyrics.com/queen/bohemian-rhapsody-lyrics/"}}
 ..
 
-Finished in 0.03176 seconds (files took 0.46247 seconds to load)
+Finished in 0.03456 seconds (files took 0.4483 seconds to load)
 2 examples, 0 failures
 
