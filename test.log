@@ -1,9 +1,25 @@
 Searching for: http://www.songlyrics.com/index.php?section=search&searchW=test
 Response status: 200 OK
+Response body: <!DOCTYPE html>
+<html>
+<head>
+  <title>Search Results</title>
+</head>
+<body>
+  <div class="serp-item">
+    <h3><a href="https://www.songlyrics.com/queen/bohemian-rhapsody-lyrics/">Bohemian Rhapsody Lyrics</a></h3>
+    <p><a href="https://www.songlyrics.com/queen-lyrics/">Queen</a></p>
+  </div>
+  <div class="serp-item">
+    <h3><a href="https://www.songlyrics.com/the-muppets/bohemian-rhapsody-lyrics/">Bohemian Rhapsody Lyrics</a></h3>
+    <p><a href="https://www.songlyrics.com/the-muppets-lyrics/">The Muppets</a></p>
+  </div>
+</body>
+</html>
 Found 2 results.
 First result: {"track"=>{"track_name"=>"Bohemian Rhapsody Lyrics", "artist_name"=>"Queen", "track_id"=>"https://www.songlyrics.com/queen/bohemian-rhapsody-lyrics/"}}
 ..
 
-Finished in 0.03236 seconds (files took 0.41087 seconds to load)
+Finished in 0.03176 seconds (files took 0.46247 seconds to load)
 2 examples, 0 failures
 
