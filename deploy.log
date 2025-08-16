@@ -1,0 +1,7 @@
++ echo 'Pulling latest changes...'
+Pulling latest changes...
++ git pull
+Already up to date.
++ echo 'Installing dependencies...'
+Installing dependencies...
++ bundle install --verbose
