@@ -6,7 +6,7 @@ RSpec.describe SongLyricsService do
 
   describe '#search' do
     it 'returns a list of songs' do
-      stub_request(:get, /www.songlyrics.com\/index.php\?section=search&searchW=test/).
+      stub_request(:get, "http://www.songlyrics.com/index.php?section=search&searchW=test").
         to_return(body: File.read('spec/fixtures/songlyrics_search.html'))
 
       results = service.search('test')

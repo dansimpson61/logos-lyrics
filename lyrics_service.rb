@@ -83,6 +83,6 @@ class SongLyricsService < LyricsService
 
     doc = Nokogiri::HTML(response.body.to_s)
     lyrics_div = doc.css('#songLyricsDiv').first
-    lyrics_div ? lyrics_div.inner_html.gsub('<br>', "\n").strip : ''
+    lyrics_div ? lyrics_div.inner_html.gsub('<br>', "\n").gsub(/(\n\s*)+/, "\n").strip : ''
   end
 end
