@@ -7,7 +7,8 @@ require 'rack/cors'
 require_relative 'lyrics_service.rb' # Require the lyrics service file
 
 # Initialize your lyrics service
-lyrics_service = MusixmatchService.new
+#lyrics_service = MusixmatchService.new
+lyrics_service = SongLyricsService.new
 #lyrics_service = LyricsOvhService.new
 
 # use Rack::Cors do
