@@ -61,6 +61,7 @@ class SongLyricsService < LyricsService
     puts "Searching for: #{search_url}"
     response = HTTP.get(search_url)
     puts "Response status: #{response.status}"
+    puts "Response body: #{response.body.to_s}"
     return [] unless response.status.success?
 
     doc = Nokogiri::HTML(response.body.to_s)
