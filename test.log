@@ -1,0 +1,9 @@
+Searching for: http://www.songlyrics.com/index.php?section=search&searchW=test
+Response status: 200 OK
+Found 2 results.
+First result: {"track"=>{"track_name"=>"Bohemian Rhapsody Lyrics", "artist_name"=>"Queen", "track_id"=>"https://www.songlyrics.com/queen/bohemian-rhapsody-lyrics/"}}
+..
+
+Finished in 0.03236 seconds (files took 0.41087 seconds to load)
+2 examples, 0 failures
+
