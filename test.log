@@ -1,0 +1,21 @@
+F.
+
+Failures:
+
+  1) SongLyricsService#search returns a list of songs
+     Failure/Error: expect(results.size).to eq(2)
+
+       expected: 2
+            got: 0
+
+       (compared using ==)
+     # ./spec/lyrics_service_spec.rb:13:in `block (3 levels) in <top (required)>'
+     # ./vendor/bundle/ruby/3.3.0/gems/webmock-3.25.1/lib/webmock/rspec.rb:39:in `block (2 levels) in <top (required)>'
+
+Finished in 0.0554 seconds (files took 0.41974 seconds to load)
+2 examples, 1 failure
+
+Failed examples:
+
+rspec ./spec/lyrics_service_spec.rb:8 # SongLyricsService#search returns a list of songs
+

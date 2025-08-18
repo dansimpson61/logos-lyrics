@@ -58,28 +58,25 @@ class SongLyricsService < LyricsService
 
   def search(term)
     search_url = "#{BASE_URL}/index.php?section=search&searchW=#{URI.encode_www_form_component(term)}"
+    
     response = HTTP.get(search_url)
     return [] unless response.status.success?
 
     doc = Nokogiri::HTML(response.body.to_s)
-    results = doc.css('div.serpresult').map do |item|
+    results = doc.css('div.serp-item').map do |item|
       title_element = item.css('h3 a').first
       artist_element = item.css('p a').first
+      next unless title_element && artist_element
 
-      if title_element && artist_element
-        {
-          'track' => {
-            'track_name' => title_element.text.strip,
-            'artist_name' => artist_element.text.strip,
-            'track_id' => title_element['href']
-          }
+      {
+        'track' => {
+          'track_name' => title_element.text.strip,
+          'artist_name' => artist_element.text.strip,
+          'track_id' => title_element['href']
         }
-      else
-        nil
-      end
-    end
-
-    results.compact
+      }
+    end.compact
+    results
   end
 
   def fetch_lyrics(track_id)
@@ -88,6 +85,9 @@ class SongLyricsService < LyricsService
 
     doc = Nokogiri::HTML(response.body.to_s)
     lyrics_div = doc.css('#songLyricsDiv').first
-    lyrics_div ? lyrics_div.inner_html.gsub('<br>', "\n").gsub(/(\n\s*)+/, "\n").strip : ''
+    lyrics_div ? lyrics_div.inner_html.gsub('<br>', "
+").gsub(/(
+\s*)+/, "
+").strip : ''
   end
 end
