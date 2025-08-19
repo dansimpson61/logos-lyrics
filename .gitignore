@@ -2,3 +2,5 @@
 *.log
 .ruby-lsp/
 .env
+*.bak
+tmp_restart_marker
