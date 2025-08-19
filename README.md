@@ -1,71 +1,194 @@
-# Lyrics Search Web Application
+# Logos Lyrics
 
-This is a simple web application that allows users to search for song lyrics. Users can enter a song title or artist name to find relevant tracks and then view the lyrics for a selected song.
+A small Sinatra app to search for songs and display full lyrics using multiple providers. The app favors resilience by querying several sources and falling back when one is down.
 
-The app should exemplify the ideas outlined in our Ode to Joy document.
+## Features
 
- Here is a summary of the task and my thinking so far.
+- Multi-provider adapter architecture with a central manager
+- Current providers (adapters):
+	- SongLyrics (songlyrics.com)
+	- LyricsFreak (lyricsfreak.com)
+	- BigLyrics (biglyrics.net)
+- Simple web UI (Slim templates + vanilla JS)
+- JSON API for search and lyrics
+- RSpec + WebMock tests with HTML fixtures
 
-Project Title: Revive and Enhance the "Logos" Lyrics Application
+## Ode to Joy alignment
 
-High-Level Goal: The project's objective is to build a robust and resilient web application that discovers and displays beautifully formatted, complete song lyrics. A core principle is to avoid dependency on any single provider and to source lyrics from a diverse range of websites, including those that host obscure, old, or niche music, while respecting copyright.
+This project intentionally follows a “joyful Ruby and Sinatra” style. A few ways the code reflects that:
 
-Initial State of the Project:
+- Expressive, clear Ruby
+	- Small, focused classes: `LyricsService` (contract), concrete adapters, and a thin `LyricsServiceManager`.
+	- Methods are short and intention‑revealing; selectors and URL patterns are explicit, not “clever”.
+- Concise without obscurity
+	- Minimal configuration; predictable, simple data shapes: `{ 'track' => { 'track_name', 'artist_name', 'track_id' } }`.
+	- Consistent API responses (`success`, `results` / `lyrics`).
+- Principle of Least Astonishment (POLA)
+	- Routing is simple (`/search`, `/lyrics`).
+	- Manager dispatches by URL host; adapters only handle domains they declare.
+- Maintainable and testable
+	- Adapters are isolated, unit-testable with WebMock and HTML fixtures.
+	- Deterministic tests document selectors and expected behaviors.
+- Robust and pragmatic
+	- Timeouts, redirect following, and meta-search fallbacks (DuckDuckGo) when native search is unreliable.
+	- Cross-adapter deduplication by normalized artist/title.
+- Sinatra simplicity
+	- Lean routes, Slim views, minimal middleware. No heavy framework ceremony.
+- The least JavaScript
+	- Vanilla JS only where necessary (fetching JSON and wiring the UI). Scraping stays server-side.
+- Loose coupling, high cohesion
+	- Each adapter encapsulates one site; the app depends on the shared contract, not any provider.
+- Easy extensibility
+	- Adding a provider is a drop‑in: implement the contract and register the adapter.
 
-The codebase is a simple Ruby/Sinatra application.
-The backend features an adapter pattern (LyricsService) for fetching lyrics and exposes two API endpoints: /search and /lyrics.
-The original implementation used the Musixmatch API, but the API key was hardcoded.
-An implementation for a second service, Lyrics.ovh, was present but commented out.
-Key Discoveries and Decisions:
+## Project layout
 
-Assessment of Existing Providers:
+- `app.rb` — Sinatra app and routes
+- `lyrics_service.rb` — base class, `LyricsServiceManager`, and provider adapters
+- `views/` — Slim templates for the UI
+- `public/` — CSS/JS assets
+- `spec/` — RSpec tests and fixtures
 
-Musixmatch: After reviewing the terms of service, I concluded that they were too restrictive, particularly concerning commercial use and data ownership.
-Lyrics.ovh: I determined that this service is defunct and no longer operational.
-Architectural Strategy:
+## Prerequisites
 
-I decided to embrace and expand the existing adapter pattern. My plan is to create a central "service manager" that can query multiple lyric providers (adapters) simultaneously. This architecture will make the application highly extensible and resilient, as it won't be reliant on any single source.
-Investigation of New Lyric Sources:
+- Ruby 3.3.x (or compatible)
+- Bundler
 
+## Setup
 
-Discovery and Integration Strategy:
+```fish
+# install gems
+bundle install
 
-Discovery: I formulated a strategy to discover new lyric sources. This involves using diverse search queries (for popular, old, and niche songs) to identify a wide range of potential lyric websites. This process would be semi-automated, with a manual vetting step to assess the quality and breadth of each source before building an adapter for it.
-Integration: For each new source, a dedicated adapter class will be created. This adapter will function as a web scraper, tailored to the specific HTML structure of that site.
+# run tests
+bundle exec rspec
+```
 
+## Run the app
 
-Desired End State: The final deliverable should be a fully functional lyrics search application that:
+```fish
+bundle exec rackup -o 0.0.0.0 --port 9292 --env development
+```
 
-Exemplifies our Ode to Joy philosophy.
-Is built on a flexible, multi-provider architecture.
-Includes multiple working lyric provider adapters.
-Has a clear framework for easily adding new adapters in the future.
-Follows best practices, such as using environment variables for API keys and other secrets.
-I hope this detailed summary is helpful for the next steps.
+Open http://localhost:9292
 
+## API
 
-The ones we've identified together so far are:
+### GET /search
+Query parameters:
+- `term` (string, required): search text like "queen bohemian rhapsody"
+- `type` (string, optional): currently `song` (default)
 
-azlyrics.com
-biglyrics.net
-songlyrics.net
-www.streetdirectory.com/lyricadvisor/
-To expand on this, here are several other potential sources we could build adapters for. These sites have different strengths; some are better for popular music, while others excel at older or more obscure tracks, which aligns with our goal of having a diverse and comprehensive collection.
+Response (success):
+```json
+{
+	"success": true,
+	"results": [
+		{
+			"track": {
+				"track_name": "Bohemian Rhapsody Lyrics",
+				"artist_name": "Queen",
+				"track_id": "https://www.songlyrics.com/queen/bohemian-rhapsody-lyrics/"
+			}
+		}
+	]
+}
+```
 
-Potential Lyric Sources:
+### GET /lyrics
+Query parameters:
+- `track_id` (string, required): provider URL identifying the song
 
-AZLyrics (azlyrics.com): One of the oldest and most popular lyric sites. It has a vast library, including many older songs, and is known for its accuracy. The HTML structure is relatively clean, which makes it a good candidate for scraping.
+Response (success):
+```json
+{ "success": true, "lyrics": "...full lyrics..." }
+```
 
-SongLyrics (songlyrics.com): Another large, well-established database. It often has user-submitted corrections, which can be a double-edged sword (potentially more accurate, but also more prone to errors).
+Errors return `{ success: false, error: "..." }`.
 
-LyricsFreak (lyricsfreak.com): This site has a large collection and often includes album track listings, which could be useful for finding related songs.
+## Architecture
 
-MetroLyrics (metrolyrics.com): Known for its partnership with Gracenote, which means it has a large, licensed catalog. The site was officially discontinued but is archived and still accessible, making it a potential source for older, hard-to-find lyrics that might not be on newer sites.
+- `LyricsService` (abstract): defines `search(term, type:)`, `fetch_lyrics(track_id)`, `can_handle_track_id?(track_id)`.
+- `LyricsServiceManager`: fan-out search to all adapters, normalize/dedupe results, and dispatch `fetch_lyrics` to the adapter that can handle the `track_id` domain.
+- Adapters implement site-specific scraping with robust selectors and timeouts (HTTP gem + Nokogiri).
 
-DarkLyrics (darklyrics.com): This is a great example of a niche-specific source. It specializes in metal (death, black, etc.) and is often the only place to find lyrics for underground bands in those genres. This is a perfect candidate for our strategy of including specialized sources.
+Design choices in practice:
+- Errors from providers degrade gracefully; the API still responds with `success: false` and a concise `error`.
+- Normalization prevents duplicate results across providers while preserving simplicity.
+- Meta-search keeps the code pragmatic and resilient without over-optimizing prematurely.
 
-Lyrics.com: A comprehensive resource that often includes metadata about songs, such as year, genre, and writers, which could be valuable for the application in the future.
+### Adding a provider
+1. Create a new subclass of `LyricsService` in `lyrics_service.rb` (or a separate file if preferred).
+2. Implement:
+	 - `search(term, type: :song)` returning an array of `{ 'track' => { 'track_name', 'artist_name', 'track_id' } }`.
+	 - `fetch_lyrics(track_id)` returning a string of lyrics.
+	 - `can_handle_track_id?(track_id)` returning true for the provider’s host.
+3. Add an instance to the manager in `app.rb`:
+	 ```ruby
+	 set :lyrics_service, LyricsServiceManager.new(services: [
+		 SongLyricsService.new,
+		 LyricsFreakService.new,
+		 BigLyricsService.new,
+		 YourNewService.new
+	 ])
+	 ```
+4. Add WebMock-backed specs under `spec/` with HTML fixtures in `spec/fixtures/`.
 
-Strategy for Integration:
+## Testing
 
-For each of these sites, the plan would be the same: create a dedicated adapter that can search the site and scrape the lyrics from the song's page. By building a collection of these adapters, the "Logos" app can draw from a wide variety of sources, making it incredibly resilient and comprehensive. We could prioritize building adapters for the sites that seem most promising and have the easiest-to-scrape HTML structures.
+```fish
+bundle exec rspec
+```
+
+Focus a single spec:
+
+```fish
+bundle exec rspec spec/biglyrics_service_spec.rb
+```
+
+## Notes and limits
+
+- This project scrapes publicly available lyric pages solely for educational/demo purposes. Respect each site’s robots.txt, terms, and applicable copyright law.
+- Search strategies may include meta-search (e.g., DuckDuckGo with `site:` filters) where a provider’s native search is unreliable.
+- The UI encodes `track_id` values and calls the backend to retrieve lyrics, avoiding cross-origin scraping from the browser.
+
+### Contributing joyfully
+- Prefer clarity over cleverness; name things well.
+- Keep methods small; avoid unnecessary metaprogramming.
+- Don't hesitate to use metaprogramming when it will result in DRYer, more elegant code.
+- Add WebMock-backed tests and fixtures for any new adapter behavior.
+- Update this README when public behavior changes.
+- Keep JavaScript minimal; prefer server-side improvements when possible.
+
+### Philosophy alignment checklist (non-binding)
+Use this as a quick self-check before opening a PR. It’s about alignment, not compliance—skip anything that doesn’t apply.
+
+- Expressiveness & clarity: are names and methods readable and intention‑revealing?
+- Small, focused methods: is code concise without obscurity?
+- POLA: will behavior/data shapes surprise future readers?
+- Sinatra simplicity: are routes/views kept lean?
+- The least JavaScript: can UI logic remain minimal and server-driven?
+- Loose coupling, high cohesion: does each class have one reason to change?
+- Tests as documentation: do WebMock/fixtures make behavior clear and deterministic?
+- Robustness: timeouts, graceful errors, and pragmatic fallbacks?
+- Extensibility: would adding/swapping a provider be straightforward?
+
+## Spiritual alignment (right and wrong)
+This app aspires to truth, beauty, and goodness in code. Alignment is practical:
+
+Right
+- Truth: honest names, explicit data shapes, tests that reflect real behavior
+- Beauty: simple, balanced design; minimal JS; lean routes and views
+- Goodness: respect sources and users; honor robots/terms; degrade gracefully
+
+Wrong
+- Obfuscation or “cleverness” that hides intent
+- Brittle scraping without tests, timeouts, or fallbacks
+- Disregarding site terms/robots or extracting in harmful ways
+- Accidental complexity and premature optimization
+
+## Roadmap
+
+- Evaluate additional sources (e.g., StreetDirectory LyricAdvisor, DarkLyrics, Lyrics.com) and add adapters with tests.
+- Improve result ranking and de-duplication across adapters.
+- Optional: add caching and retries.
