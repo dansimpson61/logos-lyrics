@@ -24,7 +24,7 @@ set :lyrics_service, LyricsServiceManager.new(services: [
 # Serve static files from the public directory
 set :public_folder, 'public'
 
-# Route to serve the index.html file
+# Root route renders the Slim index view
 get '/' do
   slim :index
 end
