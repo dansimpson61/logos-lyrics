@@ -193,7 +193,7 @@ $(document).ready(function() {
 //   }
 // }
 
-// class MusixmatchService extends LyricsService {
+
 //   constructor(apiKey) {
 //     super(apiKey);
 //     this.baseUrl = 'https://api.musixmatch.com/ws/1.1/';

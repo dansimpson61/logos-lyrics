@@ -1,1 +1,4 @@
-vendor/bundle
+.bundle
+*.log
+.ruby-lsp/
+.env

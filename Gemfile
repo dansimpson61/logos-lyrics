@@ -11,6 +11,9 @@ gem 'http'
 gem 'puma'
 gem 'nokogiri'
 gem "rackup", "~> 2.1"
+gem 'dotenv', require: 'dotenv/load'
+gem 'pry'
+gem 'slim'
 
 group :test do
   gem 'rspec'

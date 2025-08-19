@@ -1,0 +1,18 @@
+current directory: /home/dan/dev/sinatra/logos-lyrics/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+/home/dan/.rvm/rubies/ruby-3.3.4/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /home/dan/dev/sinatra/logos-lyrics/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20250815-38602-zxndvc sitelibdir\=./.gem.20250815-38602-zxndvc clean
+
+current directory: /home/dan/dev/sinatra/logos-lyrics/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20250815-38602-zxndvc sitelibdir\=./.gem.20250815-38602-zxndvc
+compiling cparse.c
+linking shared-object racc/cparse.so
+
+current directory: /home/dan/dev/sinatra/logos-lyrics/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20250815-38602-zxndvc sitelibdir\=./.gem.20250815-38602-zxndvc install
+/usr/bin/install -c -m 0755 cparse.so ./.gem.20250815-38602-zxndvc/racc
+
+current directory: /home/dan/dev/sinatra/logos-lyrics/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20250815-38602-zxndvc sitelibdir\=./.gem.20250815-38602-zxndvc clean

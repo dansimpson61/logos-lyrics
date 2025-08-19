@@ -1,0 +1,20 @@
+doctype html
+html lang="en"
+  head
+    meta charset="utf-8"
+    meta name="viewport" content="width=device-width, initial-scale=1.0"
+    title logos · lyrics
+    link rel="preconnect" href="https://fonts.googleapis.com"
+    link rel="preconnect" href="https://fonts.gstatic.com" crossorigin
+    / Tufte-inspired typography: EB Garamond for body, Bungee Shade for logo
+    link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Bungee+Shade&display=swap" rel="stylesheet"
+    link rel="stylesheet" href="/logos.css"
+  body
+    header.site-header
+      h1.logo logos
+      p.tagline small, quiet, excellent
+    main.container
+      == yield
+    footer.site-footer
+      p © #{Time.now.year} logos
+    script src="/logos.js"
