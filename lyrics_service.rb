@@ -42,16 +42,25 @@ class LyricsServiceManager
       @services.any? { |s| s.can_handle_track_id?(track_id) }
     end
 
-    # Normalize-based dedup across adapters
+    # Normalize-based dedup and group by artist
     seen = {}
-    results.each_with_object([]) do |item, acc|
+    grouped_results = results.each_with_object({}) do |item, hash|
       track = item['track'] || {}
-      artist = String(track['artist_name']).strip.downcase
+      artist = String(track['artist_name']).strip
       title = String(track['track_name']).strip.downcase.gsub(/\s+lyrics\b/i, '')
-      key = [artist, title]
-      next if artist.empty? || title.empty? || seen[key]
-      seen[key] = true
-      acc << item
+      dedup_key = [artist.downcase, title]
+
+      next if artist.empty? || title.empty? || seen[dedup_key]
+      seen[dedup_key] = true
+
+      (hash[artist] ||= []) << track
+    end
+
+    grouped_results.map do |artist_name, tracks|
+      {
+        'artist_name' => artist_name,
+        'tracks' => tracks
+      }
     end
   end
 
@@ -104,7 +113,8 @@ class SongLyricsService < LyricsService
         'track' => {
           'track_name' => title_element.text.strip,
           'artist_name' => artist_element.text.strip,
-          'track_id' => track_url
+          'track_id' => track_url,
+          'source' => 'SongLyrics'
         }
       }
     end.compact
@@ -133,7 +143,8 @@ class SongLyricsService < LyricsService
         'track' => {
           'track_name' => "#{track_name} Lyrics",
           'artist_name' => artist_name,
-          'track_id' => full
+          'track_id' => full,
+          'source' => 'SongLyrics'
         }
       }
     end.compact
@@ -189,7 +200,8 @@ class SongLyricsService < LyricsService
         'track' => {
           'track_name' => "#{track_name} Lyrics",
           'artist_name' => artist_name,
-          'track_id' => full
+          'track_id' => full,
+          'source' => 'SongLyrics'
         }
       }
     end.compact
@@ -228,7 +240,8 @@ class SongLyricsService < LyricsService
         'track' => {
           'track_name' => "#{track_name} Lyrics",
           'artist_name' => artist_name,
-          'track_id' => full
+          'track_id' => full,
+          'source' => 'SongLyrics'
         }
       }
     end.compact
@@ -301,7 +314,8 @@ class LyricsFreakService < LyricsService
         'track' => {
           'track_name' => track_name,
           'artist_name' => artist_name,
-          'track_id' => full
+          'track_id' => full,
+          'source' => 'LyricsFreak'
         }
       }
     end.compact
@@ -406,7 +420,8 @@ class BigLyricsService < LyricsService
         'track' => {
           'track_name' => track_name,
           'artist_name' => artist_name,
-          'track_id' => full
+          'track_id' => full,
+          'source' => 'BigLyrics'
         }
       }
     end.compact
