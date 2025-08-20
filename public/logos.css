@@ -7,6 +7,9 @@
   --color-background: #fff;
   --color-background-hover: #f5f5f5;
   --spacing-unit: 1.5rem;
+  --panel-collapsed-width: 4rem;
+  --panel-expanded-width: 20vw;
+  --transition-speed: 0.3s;
 }
 
 body {
@@ -15,6 +18,7 @@ body {
   background-color: var(--color-background);
   line-height: 1.6;
   margin: 0;
+  padding-left: var(--panel-collapsed-width);
 }
 
 .logo-container {
@@ -34,69 +38,62 @@ body {
   letter-spacing: 0.1em;
 }
 
-.tagline {
-  font-size: 0.9rem;
-  color: #777;
-  margin: 0;
+.search-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--panel-collapsed-width);
+  background-color: #f8f8f8;
+  border-right: 1px solid var(--color-border);
+  transition: width var(--transition-speed) ease;
+  overflow: hidden;
+  z-index: 20;
 }
 
-main.container {
-  padding: calc(var(--spacing-unit) * 4) var(--spacing-unit) 5rem;
-  max-width: 80rem;
-  margin: 0 auto;
+.search-panel:hover,
+.search-panel.is-expanded {
+  width: var(--panel-expanded-width);
+}
+
+.search-icon {
+  padding: var(--spacing-unit);
+  font-size: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  color: var(--color-accent);
+}
+
+.search-content {
+  padding: 0 var(--spacing-unit);
+  opacity: 0;
+  transition: opacity var(--transition-speed) ease;
+}
+
+.search-panel:hover .search-content,
+.search-panel.is-expanded .search-content {
+  opacity: 1;
 }
 
 form {
-  position: fixed;
-  top: var(--spacing-unit);
-  left: var(--spacing-unit);
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
-  z-index: 10;
-  background-color: var(--color-background);
-  padding: 0.5rem;
-  border-radius: 4px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 input[type="text"] {
-  flex-grow: 1;
+  width: 100%;
   font-family: var(--font-sans);
   font-size: 1rem;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 3px;
-  width: 250px;
-}
-
-button {
-  font-family: var(--font-sans);
-  font-size: 1.5rem;
-  line-height: 1;
-  padding: 0.5rem 0.8rem;
-  border: 1px solid var(--color-border);
-  background-color: #f8f8f8;
-  border-radius: 3px;
-  cursor: pointer;
-  font-weight: bold;
-  color: var(--color-accent);
-}
-
-button:hover {
-  background-color: var(--color-background-hover);
 }
 
 .results-container {
-  position: fixed;
-  top: calc(var(--spacing-unit) * 3.5);
-  left: var(--spacing-unit);
-  width: 300px;
-  max-height: 400px;
+  margin-top: 1rem;
+  height: calc(100vh - 10rem);
   overflow-y: auto;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  z-index: 9;
 }
 
 .results-list {
@@ -106,7 +103,7 @@ button:hover {
 }
 
 .result-item {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.2rem;
   border-bottom: 1px solid var(--color-border);
   cursor: pointer;
 }
@@ -122,7 +119,7 @@ button:hover {
 
 .artist-heading {
   font-weight: bold;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.2rem;
   background-color: #eee;
   border-bottom: 1px solid var(--color-border);
 }
@@ -130,13 +127,14 @@ button:hover {
 .track-title {
   display: flex;
   align-items: center;
+  font-size: 0.9rem;
 }
 
 .source-icon {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  margin-right: 0.75rem;
+  margin-right: 0.5rem;
   flex-shrink: 0;
 }
 
@@ -144,11 +142,13 @@ button:hover {
 .source-icon.lyricsfreak { background-color: #5bc0de; }
 .source-icon.biglyrics { background-color: #5cb85c; }
 
+main.content-area {
+  padding: var(--spacing-unit);
+  max-width: 80rem;
+  margin: 0 auto;
+}
 
 .lyrics-container {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--color-border);
   line-height: 1.7;
   column-count: 3;
   column-gap: 2rem;
@@ -166,6 +166,22 @@ button:hover {
 @media (max-width: 768px) {
   .lyrics-container {
     column-count: 1;
+  }
+  body {
+    padding-left: 0;
+  }
+  .search-panel {
+    width: 100%;
+    height: auto;
+    bottom: auto;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  .search-panel:hover,
+  .search-panel.is-expanded {
+    width: 100%;
+  }
+  main.content-area {
+    padding-top: 6rem;
   }
 }
 

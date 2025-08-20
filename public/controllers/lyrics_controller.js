@@ -1,10 +1,13 @@
 import { Controller } from "https://unpkg.com/@hotwired/stimulus/dist/stimulus.js"
 
 export default class extends Controller {
-  static targets = [ "input", "results", "lyrics", "loader", "artistTemplate", "trackTemplate" ]
+  static targets = [ "input", "results", "lyrics", "loader", "artistTemplate", "trackTemplate", "searchPanel" ]
 
-  connect() {
-    this.resultsTarget.style.display = "none"
+  togglePanel() {
+    this.searchPanelTarget.classList.toggle("is-expanded")
+    if (this.searchPanelTarget.classList.contains("is-expanded")) {
+      this.inputTarget.focus()
+    }
   }
 
   async search(event) {
@@ -20,11 +23,9 @@ export default class extends Controller {
     this.loaderTarget.style.display = "block"
     this.resultsTarget.style.display = "block"
 
-
     try {
       const response = await fetch(`/search?term=${encodeURIComponent(query)}`)
       const data = await response.json()
-      console.log("Received data:", data)
       this.loaderTarget.style.display = "none"
 
       if (data.success && data.results.length > 0) {
@@ -44,13 +45,10 @@ export default class extends Controller {
     const { trackId, artistName, trackName } = resultItem.dataset
     if (!trackId) return
 
-    // 1. Update search box
     this.inputTarget.value = `${artistName} - ${trackName}`
-
-    // 2. Collapse results
+    this.searchPanelTarget.classList.remove("is-expanded")
     this.#hideResults()
 
-    // 3. Load lyrics
     this.lyricsTarget.textContent = "Loading lyrics..."
     try {
       const response = await fetch(`/lyrics?track_id=${encodeURIComponent(trackId)}`)
@@ -68,13 +66,13 @@ export default class extends Controller {
   }
 
   #renderResults(results) {
-    this.resultsTarget.innerHTML = "" // Clear previous results
+    this.resultsTarget.innerHTML = ""
     results.forEach(artistGroup => {
-      console.log("Processing artistGroup:", artistGroup)
       const artistClone = this.artistTemplateTarget.content.cloneNode(true)
-      artistClone.querySelector(".artist-heading").textContent = artistGroup.artist_name
+      const artistHeading = artistClone.querySelector("h3")
+      artistHeading.textContent = artistGroup.artist_name
 
-      const trackList = artistClone.querySelector(".track-list")
+      const trackList = artistClone.querySelector("ul")
       artistGroup.tracks.forEach(track => {
         const trackClone = this.trackTemplateTarget.content.cloneNode(true)
         const trackElement = trackClone.querySelector(".result-item")

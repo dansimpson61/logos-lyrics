@@ -1,23 +1,13 @@
-section data-controller="lyrics"
-  form data-action="submit->lyrics#search"
-    label for="search-input" class="visually-hidden" Search for a song
-    input#search-input type="text" placeholder="Search for a song or artist..." data-lyrics-target="input"
-    button type="submit" >
+section.lyrics-container
+  div data-lyrics-target="lyrics"
 
-  section.results-container
-    p.loading-indicator data-lyrics-target="loader" style="display: none;" Loading...
-    ul.results-list data-lyrics-target="results" data-action="click->lyrics#select"
+template data-lyrics-target="artistTemplate"
+  li
+    h3.artist-heading
+    ul.track-list
 
-  section.lyrics-container
-    div data-lyrics-target="lyrics"
-
-  template data-lyrics-target="artistTemplate"
-    li
-      h3.artist-heading data-target="artistName"
-      ul.track-list data-target="trackList"
-
-  template data-lyrics-target="trackTemplate"
-    li.result-item data-action="click->lyrics#select" data-track-id="" data-artist-name="" data-track-name=""
-      .track-title
-        .source-icon
-        span.track-name-text
+template data-lyrics-target="trackTemplate"
+  li.result-item data-action="click->lyrics#select" data-track-id="" data-artist-name="" data-track-name=""
+    .track-title
+      .source-icon
+      span.track-name-text
