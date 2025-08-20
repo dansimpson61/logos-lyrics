@@ -1,9 +1,17 @@
-.search
-  form#search-form
-    input#search-input.search-song type="text" name="song" placeholder="song or artist" autofocus=true
-    button.search-button type="submit" Search
-  .loader style="display:none;" Loading...
-  ul#results.results
+section data-controller="lyrics"
+  form data-action="submit->lyrics#search"
+    label for="search-input" class="visually-hidden" Search for a song
+    input#search-input type="text" placeholder="Search for a song or artist..." data-lyrics-target="input"
+    button type="submit" Search
 
-section#lyrics.lyrics style="display:none;"
-  .lyrics-content
+  section.results-container
+    p.loading-indicator data-lyrics-target="loader" style="display: none;" Loading...
+    ul.results-list data-lyrics-target="results" data-action="click->lyrics#select"
+
+  section.lyrics-container
+    div data-lyrics-target="lyrics"
+
+  template data-lyrics-target="resultTemplate"
+    li class="result-item" data-track-id=""
+      span class="artist-name"
+      span class="track-name"
