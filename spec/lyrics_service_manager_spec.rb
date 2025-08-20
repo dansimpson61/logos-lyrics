@@ -5,17 +5,29 @@ RSpec.describe LyricsServiceManager do
   let(:manager) { described_class.new }
 
   describe '#search' do
-    it 'delegates to SongLyricsService and returns normalized results' do
-  stub_request(:get, "https://www.songlyrics.com/index.php?section=search&searchW=queen").
+    it 'delegates to services and returns grouped, normalized results' do
+      stub_request(:get, "https://www.songlyrics.com/index.php?section=search&searchW=queen").
         to_return(body: File.read('spec/fixtures/songlyrics_search.html'))
+
+      # Mock the other services to return empty arrays to isolate the test
+      allow_any_instance_of(LyricsFreakService).to receive(:search).and_return([])
+      allow_any_instance_of(BigLyricsService).to receive(:search).and_return([])
 
       results = manager.search('queen')
       expect(results).to be_an(Array)
-      expect(results.size).to eq(2)
-      first = results.first
-      expect(first['track']['artist_name']).to eq('Queen')
-      expect(first['track']['track_name']).to match(/Bohemian Rhapsody/i)
-      expect(first['track']['track_id']).to match(%r{https?://www\.songlyrics\.com/})
+      expect(results.size).to eq(1) # Only one artist group: Queen
+
+      queen_group = results.first
+      expect(queen_group['artist_name']).to eq('Queen')
+
+      tracks = queen_group['tracks']
+      expect(tracks).to be_an(Array)
+      expect(tracks.size).to eq(2)
+
+      first_track = tracks.first
+      expect(first_track['track_name']).to match(/Bohemian Rhapsody/i)
+      expect(first_track['track_id']).to match(%r{https?://www\.songlyrics\.com/})
+      expect(first_track['source']).to eq('SongLyrics')
     end
 
     it 'returns empty array for blank term' do

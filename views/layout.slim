@@ -10,11 +10,11 @@ html lang="en"
     link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Bungee+Shade&display=swap" rel="stylesheet"
     link rel="stylesheet" href="/logos.css"
   body
-    header.site-header
-      h1.logo logos
-      p.tagline small, quiet, excellent
     main.container
       == yield
-    footer.site-footer
-      p © #{Time.now.year} logos
+
+    .logo-container
+      h1.logo logos
+      p.tagline small, quiet, excellent
+
     script type="module" src="/application.js"
