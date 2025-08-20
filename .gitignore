@@ -4,3 +4,13 @@
 .env
 *.bak
 tmp_restart_marker
+
+# Do not track vendored gems; install locally with `bundle install`
+vendor/
+
+# Only keep essential binstubs; ignore any others generated locally
+bin/*
+!bin/rackup
+!bin/rspec
+!bin/puma
+!bin/rake

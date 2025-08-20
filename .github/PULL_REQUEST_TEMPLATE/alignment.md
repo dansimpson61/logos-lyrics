@@ -27,6 +27,7 @@ Wrong
 - Obfuscation/cleverness that hides intent
 - Brittle scraping without tests/timeouts/fallbacks
 - Ignoring site terms/robots; accidental complexity and premature optimization
+- ugly, machine-centered code
 
 ## Screenshots / Demos
 
