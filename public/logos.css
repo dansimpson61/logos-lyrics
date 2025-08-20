@@ -19,15 +19,19 @@ body {
 
 .logo-container {
   position: fixed;
-  bottom: var(--spacing-unit);
-  left: var(--spacing-unit);
+  bottom: 0;
+  left: 0;
+  padding: var(--spacing-unit);
+  background-color: var(--color-background);
   z-index: 10;
 }
 
 .logo {
-  font-family: 'Bungee Shade', cursive;
+  font-family: var(--font-serif);
   font-size: 2.5rem;
   margin: 0;
+  font-weight: bold;
+  letter-spacing: 0.1em;
 }
 
 .tagline {
@@ -37,7 +41,7 @@ body {
 }
 
 main.container {
-  padding: calc(var(--spacing-unit) * 4) var(--spacing-unit) calc(var(--spacing-unit) * 4);
+  padding: calc(var(--spacing-unit) * 4) var(--spacing-unit) 5rem;
   max-width: 80rem;
   margin: 0 auto;
 }
@@ -149,6 +153,8 @@ button:hover {
   column-count: 3;
   column-gap: 2rem;
   column-rule: 1px solid #eee;
+  white-space: pre-wrap;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 1200px) {
