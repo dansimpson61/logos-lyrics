@@ -146,6 +146,17 @@ Focus a single spec:
 bundle exec rspec spec/biglyrics_service_spec.rb
 ```
 
+## Repository hygiene
+
+This repo is intentionally slim:
+
+- Dependencies are not vendored. `vendor/` is ignored; run `bundle install` locally.
+- Only essential binstubs are tracked: `bin/rackup`, `bin/rspec`, `bin/puma`, `bin/rake`.
+- Logs, temp files, and backups are ignored. Keep your local `.env` uncommitted.
+- Use `bundle exec` to ensure the correct gem versions are used.
+
+If you accidentally commit generated artifacts, remove them from the index and rely on `.gitignore`.
+
 ## Notes and limits
 
 - This project scrapes publicly available lyric pages solely for educational/demo purposes. Respect each site’s robots.txt, terms, and applicable copyright law.
@@ -186,6 +197,36 @@ Wrong
 - Brittle scraping without tests, timeouts, or fallbacks
 - Disregarding site terms/robots or extracting in harmful ways
 - Accidental complexity and premature optimization
+
+## Deployment
+
+This is a Rack app with `config.ru` and Puma. You can run it locally or deploy to a platform like Heroku.
+
+### Local (development)
+
+```fish
+bundle exec rackup -o 0.0.0.0 --port 9292 --env development
+```
+
+Open http://localhost:9292
+
+### Heroku (example)
+
+Assuming you have a Heroku app set up and the `heroku` remote configured:
+
+```fish
+# push current branch to Heroku
+git push heroku main
+
+# (optional) set environment for production
+heroku config:set RACK_ENV=production
+```
+
+Heroku will detect Ruby, install gems, and boot via `config.ru`. If you prefer an explicit Procfile:
+
+```
+web: bundle exec rackup -p $PORT -E production
+```
 
 ## Roadmap
 
