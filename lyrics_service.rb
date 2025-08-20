@@ -448,46 +448,93 @@ end
 # ChartLyrics service subclass
 class ChartLyricsService < LyricsService
   BASE_URL = 'http://api.chartlyrics.com/apiv1.asmx'
+  HEADERS = {
+    'User-Agent' => 'LogosLyrics/1.0 (Ruby HTTP Client)',
+    'Accept' => 'application/xml, text/xml'
+  }.freeze
+
+  def initialize
+    # ChartLyrics API doesn't require authentication currently,
+    # but API key can be set via ENV['CHARTLYRICS_API_KEY'] if needed in future
+    @api_key = ENV['CHARTLYRICS_API_KEY']
+  end
 
   def search(term, type: :song)
-    # Return hardcoded results for demonstration purposes
-    [
-      {
-        'track' => {
-          'track_name' => 'Yesterday',
-          'artist_name' => 'The Beatles',
-          'track_id' => 'yesterday-the-beatles'
+    return [] if term.nil? || term.strip.empty?
+
+    begin
+      # Use SearchLyric endpoint to search for songs
+      search_url = "#{BASE_URL}/SearchLyric"
+      response = HTTP.timeout(connect: 5, read: 10).headers(HEADERS)
+                     .get(search_url, params: { artist: '', song: term })
+      
+      return [] unless response.status.success?
+
+      doc = Nokogiri::XML(response.body.to_s)
+      results = []
+
+      doc.css('SearchLyricResult').each do |result|
+        song_id = result.at_css('LyricId')&.text
+        checksum = result.at_css('LyricChecksum')&.text
+        artist = result.at_css('Artist')&.text
+        song = result.at_css('Song')&.text
+
+        next if song_id.nil? || checksum.nil? || artist.nil? || song.nil?
+        next if artist.strip.empty? || song.strip.empty?
+
+        # Create a track_id that includes both song_id and checksum for lyrics fetching
+        track_id = "#{song_id}|#{checksum}"
+
+        results << {
+          'track' => {
+            'track_name' => song.strip,
+            'artist_name' => artist.strip,
+            'track_id' => track_id
+          }
         }
-      },
-      {
-        'track' => {
-          'track_name' => 'Let It Be',
-          'artist_name' => 'The Beatles',
-          'track_id' => 'let-it-be-the-beatles'
-        }
-      },
-      {
-        'track' => {
-          'track_name' => 'Bohemian Rhapsody',
-          'artist_name' => 'Queen',
-          'track_id' => 'bohemian-rhapsody-queen'
-        }
-      }
-    ]
+      end
+
+      results
+    rescue HTTP::TimeoutError, HTTP::ConnectionError, Nokogiri::XML::SyntaxError => e
+      # Log error if needed and return empty array
+      []
+    end
   end
 
   def fetch_lyrics(track_id)
-    # ChartLyrics API requires a checksum for GetLyric. This is a placeholder.
-    # In a real application, you'd need to implement the checksum calculation.
-    checksum = 'PLACEHOLDER_CHECKSUM' 
-  response = HTTP.timeout(connect: 5, read: 10).get("#{BASE_URL}/GetLyric?lyricId=#{track_id}&lyricCheckSum=#{checksum}")
-    return '' unless response.status.success?
+    return '' if track_id.nil? || track_id.strip.empty?
 
-    doc = Nokogiri::XML(response.body.to_s)
-    doc.css('Lyric').text
+    begin
+      # Parse track_id to get song_id and checksum
+      parts = track_id.split('|')
+      return '' if parts.length != 2
+
+      song_id, checksum = parts
+      
+      # Use GetLyric endpoint with proper parameters
+      lyrics_url = "#{BASE_URL}/GetLyric"
+      response = HTTP.timeout(connect: 5, read: 10).headers(HEADERS)
+                     .get(lyrics_url, params: { lyricId: song_id, lyricCheckSum: checksum })
+      
+      return '' unless response.status.success?
+
+      doc = Nokogiri::XML(response.body.to_s)
+      lyric_text = doc.at_css('Lyric')&.text
+      
+      # Return empty string if no lyrics found or if lyrics indicate not available
+      return '' if lyric_text.nil? || lyric_text.strip.empty? || lyric_text.strip == 'Not found'
+      
+      lyric_text.strip
+    rescue HTTP::TimeoutError, HTTP::ConnectionError, Nokogiri::XML::SyntaxError => e
+      ''
+    end
   end
 
-  def can_handle_track_id?(_track_id)
-    false
+  def can_handle_track_id?(track_id)
+    return false if track_id.nil? || track_id.strip.empty?
+    
+    # Check if track_id has the expected format: "song_id|checksum"
+    parts = track_id.split('|')
+    parts.length == 2 && !parts[0].empty? && !parts[1].empty?
   end
 end

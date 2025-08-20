@@ -11,7 +11,8 @@ require_relative 'lyrics_service.rb' # Require the lyrics service file
 set :lyrics_service, LyricsServiceManager.new(services: [
   SongLyricsService.new,
   LyricsFreakService.new,
-  BigLyricsService.new
+  BigLyricsService.new,
+  ChartLyricsService.new
 ])
 
 # use Rack::Cors do
